@@ -80,9 +80,23 @@ The unit of analysis cookie, although if the student enrolls in the free trial, 
 The same user-id cannot enroll in the free trial twice. 
 For users that do not enroll, their user-id is not tracked in the experiment, even if they were signed in when they visited the course overview page.
 
+The data that you need to analyze is located in `data/udacity.csv`.
+It contains the raw information needed to compute any of the metrics we discuss in the questions below. 
+The data is broken down by day.
+
+The definition of each variable is:
+
+* `pageviews`: Number of unique cookies to view the course overview page that day.
+* `clicks`: Number of unique cookies to click "Start Free Trial."
+* `enrollments`: Number of user-ids to enroll in the free trial that day.
+* `payments`: Number of user-ids who enrolled and eventually pay after 14 days of being enrolled. 
+Note that the date for the `payments` column is the start date, that is, the date of enrollment, rather than the date of the payment. 
+The payment happened 14 days later. 
+Because of this, the enrollments and payments are tracked for 14 fewer days than the other columns.
+
 ### Outcome Variable and Baseline Variable Choices
 
-1. Which of the following metrics would you choose to measure for this experiment and why? For each metric you choose, indicate whether you would use it as an baseline metric or an outcome metric.
+1. Which of the following metrics (some of which you may need to compute from existing data) would you choose to measure for this experiment and why? For each metric you choose, indicate whether you would use it as an baseline metric or an outcome metric.
 The minimum detectable effect for each metric is included in parentheses.
     a. **Number of cookies**: the number of unique cookies to view the course overview page. (Minimum Detectable Effect = 3000)
     b.  **Number of user-ids**: the number of users who enroll in the free trial. (Minimum Detectable Effect = 50)
@@ -93,13 +107,13 @@ The minimum detectable effect for each metric is included in parentheses.
     g.  **Net conversion**: That is, number of user-ids to remain enrolled past the 14-day boundary (and thus make at least one payment) divided by the number of unique cookies to click the "Start free trial" button. (Minimum Detectable Effect =  0.0075)
 
 ```{block, solution = TRUE}
-potential outcomes are:
+Outcomes variables that we want to track include:
 
 * Gross conversion
 * Net conversion
 * Retention
 
-baselines (dont change due to experiment):
+Baselines (dont change due to experiment):
 
 * clicks,
 * pageviews
@@ -109,7 +123,7 @@ baselines (dont change due to experiment):
 
 ### Determining Sample Size, Duration and Exposure
 
-The following estimates are baseline values for some key numbers from Udacity in the time period before the experiment begins. Note: that these numbers are fictious.
+The following estimates are baseline values for some key numbers from Udacity in the time period before the experiment begins. Note: that these numbers are fictitious.
 
 ```{r, eval = TRUE, echo = TRUE}
 # Number of unique cookies per day
@@ -194,22 +208,6 @@ ceiling(pageviews_for_sample_gross_conversion / (0.6*n_cookies_per_day))
 ```
 
 ### Balance Checks
-
-The data that you need to analyze is located in `data/udacity.csv`.
-It contains the raw information needed to compute any of the above metrics broken down by day.
-
-The definition of each column is:
-
-The meaning of each column is:
-
-* `pageviews`: Number of unique cookies to view the course overview page that day.
-* `clicks`: Number of unique cookies to click the course overview page that day.
-* `enrollments`: Number of user-ids to enroll in the free trial that day.
-* `payments`: Number of user-ids who who enrolled on that day to remain enrolled for 14 days and thus make a payment. 
-
-Note that the date for this column is the start date, that is, the date of enrollment, rather than the date of the payment. 
-The payment happened 14 days later. 
-Because of this, the enrollments and payments are tracked for 14 fewer days than the other columns.
 
 5. Load the data into `R`.
 
