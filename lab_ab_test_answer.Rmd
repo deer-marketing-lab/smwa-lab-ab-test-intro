@@ -1,0 +1,221 @@
+---
+title: "My answers"
+author: "My name"
+date: "2024-04-27"
+output: html_document
+---
+
+## Learning Goals
+
+By the end of this tutorial you will be able to:
+
+1. Justify the choice of outcome variables and baseline variables in an A/B test
+2. Determine the necessary sample size and duration of an A/B test
+3. Analyze whether an A/B test was correctly randomized
+4. Analyze the effects of a treatment on outcome variables of interest
+5. Prescribe recommendations to managers based on the results of an A/B test
+6. Design a follow-up experiment based on results of an A/B test
+
+## Instructions to Students
+
+These lab assignments are **not graded**, but we encourage you to invest time and effort into working through them from start to finish.
+Add your solutions to the `lab_ab_test_answers.Rmd` file as you work through the exercises so that you have a record of the work you have done.
+
+Obtain a copy of both the question and answer files using Git.
+To clone a copy of this repository to your own PC, use the following command:
+
+
+Once you have your copy, open the answer document in RStudio as an RStudio project and work through the questions.
+
+The goal of the tutorials is to explore how to "do" the technical side of social media analytics.
+Use this as an opportunity to push your limits and develop new skills.
+When you are uncertain or do not know what to do next - ask questions of your peers and the instructors on the class Slack workspace.
+
+You will need to load the following `R` libraries to complete the exercises:
+
+```{r, message = FALSE}
+library(readr)
+library(dplyr)
+library(broom)
+library(ggplot2)
+library(tidyr)
+library(tibble)
+library(vtable)
+```
+
+You may need to install some of these if they are not already on your machine.
+
+## A/B Testing Case Study: "Free Trial Screening"
+
+Udacity is an online learning platform that offers courses and nano-degree programs in various fields of technology, business, and data science.
+They aim to provide accessible and high-quality education to individuals seeking to advance their careers or learn new skills in the rapidly evolving fields of technology and business.
+
+Udacity courses currently have two options on the home page: "start free trial", and "access course materials". 
+If the student clicks "start free trial", they will be asked to enter their credit card information, and then they will be enrolled in a free trial for the paid version of the course. 
+After 14 days, they will automatically be charged unless they cancel first. 
+If the student clicks "access course materials", they will be able to view the videos and take the quizzes for free, but they will not receive coaching support or a verified certificate, and they will not submit their final project for feedback.
+
+Udacity have struggled with setting clear expectations for students who enrol in their programs, particularly with regard to the workload in terms of expected study time. 
+As a result, they face the problem of frustrated students who leave the course before completing the free trial. 
+These frustrated students who leave before the trial ends, ultimately do not stay enrolled long enough to be charged for the paid version of the course.
+Udacity wants to improve the overall student- and educator experience on the platform.
+
+Udacity have designed an experiment, to test a change where if the student clicked "start free trial", they were asked how much time they had available to devote to the course. 
+If the student indicated 5 or more hours per week, they would be taken through the checkout process as usual. 
+If they indicated fewer than 5 hours per week, a message would appear indicating that Udacity courses usually require a greater time commitment for successful completion, and suggesting that the student might like to access the course materials for free. 
+At this point, the student would have the option to continue enrolling in the free trial, or access the course materials for free instead. 
+The screenshot below shows what the experiment looks like for students allocated to the treatment group:
+
+
+The unit of analysis cookie, although if the student enrolls in the free trial, they are tracked by user-id from that point forward. 
+The same user-id cannot enroll in the free trial twice. 
+For users that do not enroll, their user-id is not tracked in the experiment, even if they were signed in when they visited the course overview page.
+
+The data that you need to analyze is located in `data/udacity.csv`.
+It contains the raw information needed to compute any of the metrics we discuss in the questions below. 
+The data is broken down by day.
+
+The definition of each variable is:
+
+* `pageviews`: Number of unique cookies to view the course overview page that day.
+* `clicks`: Number of unique cookies to click "Start Free Trial."
+* `enrollments`: Number of user-ids to enroll in the free trial that day.
+* `payments`: Number of user-ids who enrolled and eventually pay after 14 days of being enrolled. 
+Note that the date for the `payments` column is the start date, that is, the date of enrollment, rather than the date of the payment. 
+The payment happened 14 days later. 
+Because of this, the enrollments and payments are tracked for 14 fewer days than the other columns.
+
+### Outcome Variable and Baseline Variable Choices
+
+1. Which of the following metrics (some of which you may need to compute from existing data) would you choose to measure for this experiment and why? For each metric you choose, indicate whether you would use it as an baseline metric or an outcome metric.
+The minimum detectable effect for each metric is included in parentheses.
+    a. **Number of cookies**: the number of unique cookies to view the course overview page. (Minimum Detectable Effect = 3000)
+    b.  **Number of user-ids**: the number of users who enroll in the free trial. (Minimum Detectable Effect = 50)
+    c.  **Number of clicks**: That is, number of unique cookies to click the "Start free trial" button (which happens before the free trial screener is trigger). (Minimum Detectable Effect = 240)
+    d.  **Click-through-probability**: That is, number of unique cookies to click the "Start free trial" button divided by number of unique cookies to view the course overview page. (Minimum Detectable Effect = 0.01)
+    e. **Gross conversion**: That is, number of user-ids to complete checkout and enroll in the free trial divided by number of unique cookies to click the "Start free trial" button. (Minimum Detectable Effect =  0.01)
+    f.  **Retention**: That is, number of user-ids to remain enrolled past the 14-day boundary (and thus make at least one payment) divided by number of user-ids to complete checkout. (Minimum Detectable Effect = 0.01)
+    g.  **Net conversion**: That is, number of user-ids to remain enrolled past the 14-day boundary (and thus make at least one payment) divided by the number of unique cookies to click the "Start free trial" button. (Minimum Detectable Effect =  0.0075)
+
+```{r}
+# Write your answer here
+```
+
+
+### Determining Sample Size, Duration and Exposure
+
+The following estimates are baseline values for some key numbers from Udacity in the time period before the experiment begins. Note: that these numbers are fictitious.
+
+```{r, eval = TRUE, echo = TRUE}
+# Number of unique cookies per day
+n_cookies_per_day <- 40000
+# Number of unique cookies that click "start free trial" per day
+n_cookies_start_trial <- 3200
+# Number of enrollments per day
+n_enroll <- 660
+# Click through probability for start free trial
+n_ctr_free <- 0.08
+# Probability of enrolling, given click
+n_prob_enrol_click <- 0.20625
+# Probability of payment, given enrol
+n_prob_payment_enroll <- 0.53
+# Probability of Payment, given click
+n_prob_payment_click <- 0.109313
+```
+
+2. How many page views will you need to collect to have adequate statistical power in your experiment? Ensure there is enough power for each of your metrics of choice. Use the following values in your analysis, $alpha = 0.05$, $\beta = 0.2$ 
+
+```{r}
+# Write your answer here
+```
+
+
+3. What percentage of Udacity's traffic would you divert to this experiment? Explain.
+
+Write your answer here
+
+4. Given the percentage you chose, how long would the experiment take to run?  If the answer is longer than four weeks, then this is unreasonably long, and you should go back and update your earlier decisions.
+
+```{r}
+# Write your answer here
+```
+
+
+### Balance Checks
+
+5. Load the data into `R`.
+
+```{r}
+# Write your answer here
+```
+
+
+6. Are there any missing values in your data? Make a decision to drop or keep them, and justify your decision.
+
+```{r}
+# Write your answer here
+```
+
+
+7. Verify the randomization into treatment and control group was successful. If you find evidence that the randomization failed look at the day by day data and see if you can offer any insight into what is causing the problem.
+
+```{r}
+#Write your answer here
+```
+
+### Analysis 
+
+8. Compute the value of the outcome variables you chose above aggregating across all days in the experiment.
+
+```{r}
+# Write your answer here
+```
+
+
+9. Produce plots of your data that show how the outcome variables of interest differ between the treatment and control groups.
+
+```{r}
+# Write your answer here
+```
+
+
+10. Conduct the appropriate statistical tests to examine the effect of the treatment on your outcome variables using data aggregated across the duration of the experiment.
+
+HINT: Use the `prop.test()` or `t.test()` functions.
+
+```{r}
+# Write your answer here
+```
+
+11. Now consider each day as an independent unit of observation. Use a linear regression to test whether the treatment impacts your outcome variables of choice. Interpret the results.
+
+```{r}
+# Write your answer here
+```
+
+
+12. Which of two sets of estimates do you prefer? Explain.
+
+Write your answer here
+
+
+
+### Recommendations
+
+13. Based on your analysis, would you launch this feature? Justify your answer.
+
+Write your answer here
+
+
+### Follow Up Experiment
+
+14. If you wanted to reduce the number of frustrated students who cancel early in the course, what experiment would you try? 
+    a. Give a brief description of the change you would make, 
+    b. What your hypothesis would be about the effect of the change, 
+    c. What metrics you would want to measure, and what unit of analysis you would use. 
+
+Include an explanation of each of your choices.
+
+Write your answer here.
+
+
